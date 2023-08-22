@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+from django.utils.timezone import localtime
 from django.db import models
 
 
@@ -28,3 +30,36 @@ class Visit(models.Model):
                 if self.leaved_at else 'not leaved'
             )
         )
+
+    def get_duration(self):
+        entered_at = localtime(self.entered_at)
+        if self.leaved_at == None:
+            leaved_at = localtime(datetime.now(UTC))
+        else:
+            leaved_at = localtime(self.leaved_at)
+        duration = leaved_at - entered_at
+        total_seconds = duration.total_seconds()
+        return total_seconds
+
+    def format_duration(self, duration):
+        seconds = int(duration % 60)
+        minutes = int((duration % 3600) // 60)
+        hours = int((duration % 86400) // 3600)
+        days = int(duration // 86400)
+
+        if days == 0:
+            if hours == 0:
+                if minutes == 0:
+                    return f'{seconds}сек'
+                else:
+                    return f'{minutes}мин {seconds}сек'
+            else:
+                return f'{hours}ч {minutes}мин {seconds}сек'
+        else:
+            return f'{days} дней {hours}ч {minutes}мин {seconds}сек'
+
+    def is_strange(self):
+        if self.get_duration() > 3600:
+            return True
+        else:
+            return False
