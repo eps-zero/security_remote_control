@@ -47,19 +47,16 @@ class Visit(models.Model):
         hours = int((duration % 86400) // 3600)
         days = int(duration // 86400)
 
-        if days == 0:
-            if hours == 0:
-                if minutes == 0:
-                    return f'{seconds}сек'
-                else:
-                    return f'{minutes}мин {seconds}сек'
-            else:
-                return f'{hours}ч {minutes}мин {seconds}сек'
-        else:
-            return f'{days} дней {hours}ч {minutes}мин {seconds}сек'
+        time_parts = [
+            (days, 'дней'),
+            (hours, 'ч'),
+            (minutes, 'мин'),
+            (seconds, 'сек')
+        ]
+
+        time_str = ' '.join(f'{value}{unit}' for value, unit in time_parts if value > 0)
+        return time_str
+
 
     def is_strange(self):
-        if self.get_duration() > 3600:
-            return True
-        else:
-            return False
+        return self.get_duration() > 3600
